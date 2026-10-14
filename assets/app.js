@@ -59,7 +59,7 @@ function renderResults() {
   });
   if ($("resultCount")) $("resultCount").textContent = apiReady ? `${filtered.length}개 공고` : "실시간 데이터 연결 대기";
   if ($("emptyState")) $("emptyState").hidden = filtered.length !== 0;
-  if ($("demoNotice")) $("demoNotice").hidden = apiReady;
+  if ($("demoNotice")) $("demoNotice").hidden = false;
 }
 async function loadSupportData() {
   const count = $("resultCount");
