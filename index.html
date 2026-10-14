@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="ko">
-<head><meta name="robots" content="noindex, nofollow">
-  <meta charset="utf-8"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232459d3'/%3E%3Ctext x='16' y='23' font-size='20' font-weight='700' text-anchor='middle' fill='white' font-family='sans-serif'%3E지%3C/text%3E%3C/svg%3E">
+<head><meta charset="utf-8"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%232459d3'/%3E%3Ctext x='16' y='23' font-size='20' font-weight='700' text-anchor='middle' fill='white' font-family='sans-serif'%3E지%3C/text%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="중앙정부와 지자체의 정부지원사업 정보를 한곳에서 검색하고 공식 공고문으로 이동하세요.">
   <meta name="theme-color" content="#f7f8fa">
@@ -56,9 +55,9 @@
   <section class="results-section">
     <div class="section-heading">
       <div><p class="eyebrow">SEARCH RESULTS</p><h2>지원사업 공고</h2></div>
-      <p id="resultCount" class="result-count" role="status" aria-live="polite">예시 데이터</p>
+      <p id="resultCount" class="result-count" role="status" aria-live="polite">공고 불러오는 중</p>
     </div>
-    <div id="demoNotice" class="notice"><strong>초기 시제품 안내</strong> 현재 결과는 화면 확인을 위한 예시 데이터입니다. 실제 공공데이터 API와 연결되기 전에는 신청 가능 여부나 마감일을 실제 정보로 사용하지 마세요.</div>
+    <div id="demoNotice" class="notice" role="status" aria-live="polite">공공데이터 API에서 지원사업 공고를 불러오는 중입니다.</div>
     <div id="results" class="results-grid"></div>
     <div id="emptyState" class="empty-state" hidden><strong>검색 결과가 없습니다.</strong><p>검색어를 줄이거나 지역·지원 분야 필터를 변경해 보세요.</p></div>
   </section>
