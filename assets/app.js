@@ -39,7 +39,7 @@ function renderResults(){
    const deadline = document.createElement("span"); deadline.className = "deadline"; deadline.textContent = item.period && item.period !== "공고 원문 확인" ? item.period : "공고 정보";
    top.append(tag,deadline);
    const title = document.createElement("h3"); title.textContent = item.title;
-   const summary = document.createElement("p"); summary.className = "summary"; summary.textContent = item.summary;
+   const summary = document.createElement("p"); summary.className = "summary"; summary.textContent = cleanApiText(item.summary);
    const meta = document.createElement("dl"); meta.className = "meta-list";
    [["주관 기관",item.agency],["지원 대상",item.target],["신청 기간",item.period]].forEach(([k,v])=>{
      const row = document.createElement("div"); row.className = "meta-row";
