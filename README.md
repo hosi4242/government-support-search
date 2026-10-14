@@ -1,4 +1,15 @@
-# 지원금 찾기 — 통합검색 기본 틀
+# 지원금 찾기 — Cloudflare Workers API 연동 브랜치
+
+## 현재 배포 구성 및 검증 상태
+
+- 이 브랜치는 **Cloudflare Workers + Static Assets** 방식입니다. 기존 Workers 배포를 유지하며 Cloudflare Pages Functions를 사용하지 않습니다.
+- `wrangler.jsonc`의 `main`은 `./_worker.js`이며, `/api/*` 요청은 Worker가 먼저 처리합니다.
+- Worker는 암호화된 Cloudflare Secret `DATA_GO_KR_SERVICE_KEY`를 서버에서 읽습니다. 인증키를 HTML이나 브라우저 JavaScript에 넣지 마세요.
+- 정적 사이트 파일은 저장소 루트에서 제공하며, `.assetsignore`는 Worker 소스와 설정 파일이 공개 정적 파일로 배포되지 않도록 제외합니다.
+- GitHub 브랜치 수정은 완료했지만, **운영 URL에서 실제 API 응답을 확인하기 전까지는 API 연결 성공으로 간주하지 않습니다.** 배포 후 `/api/supports`가 JSON의 `success: true`와 `items` 배열을 반환하는지, 검색과 공식 공고 링크가 동작하는지 확인해야 합니다.
+- 공공데이터포털의 해당 API는 개발 단계 자동승인, 운영 단계 심의승인으로 안내되어 있습니다. 운영 승인 상태도 확인하세요.
+
+> 아래 내용은 원본 정적 사이트 템플릿을 만들 때 작성한 이력과 참고 사항입니다. 현재 브랜치의 배포 방식은 위 설명을 기준으로 확인하세요.
 
 정적 HTML/CSS/JavaScript로 만든 초안입니다. GitHub + Cloudflare Pages에 올릴 수 있도록 프레임워크나 빌드 단계 없이 구성했습니다.
 
