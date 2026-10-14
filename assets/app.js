@@ -9,24 +9,25 @@ const $ = (id) => document.getElementById(id);
 function cleanApiText(value){
  if (value == null) return "";
  let text = String(value);
- // API descriptions may contain HTML that has been escaped more than once.
+ // Decode HTML entities, including API responses that were encoded more than once.
  for (let i = 0; i < 3; i++) {
    const doc = new DOMParser().parseFromString(text, "text/html");
    const decoded = doc.body.textContent || "";
    if (decoded === text) break;
    text = decoded;
  }
+ // Keep paragraph and list breaks before removing remaining markup.
  text = text
-   .replace(/<\\s*\\/p\\s*>/gi, "\\n")
-   .replace(/<\\s*br\\s*\\/?\\s*>/gi, "\\n")
-   .replace(/<\\s*\\/li\\s*>/gi, "\\n");
+   .replace(/<\s*\/p\s*>/gi, "\n")
+   .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+   .replace(/<\s*\/li\s*>/gi, "\n");
  const doc = new DOMParser().parseFromString(text, "text/html");
  return (doc.body.textContent || text)
-   .replace(/\\u00a0/g, " ")
-   .replace(/[ \\t]+\\n/g, "\\n")
-   .replace(/\\n[ \\t]+/g, "\\n")
-   .replace(/\\n{3,}/g, "\\n\\n")
-   .replace(/[ \\t]{2,}/g, " ")
+   .replace(/\u00a0/g, " ")
+   .replace(/[ \t]+\n/g, "\n")
+   .replace(/\n[ \t]+/g, "\n")
+   .replace(/\n{3,}/g, "\n\n")
+   .replace(/[ \t]{2,}/g, " ")
    .trim();
 }
 function safeUrl(u){
