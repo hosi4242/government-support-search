@@ -1,2 +1,4 @@
 User-agent: *
-Disallow: /
+Allow: /
+
+Sitemap: https://government-support-search.hosi4242.workers.dev/sitemap.xml
