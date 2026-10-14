@@ -100,15 +100,29 @@ async function supports(request, env) {
     try {
       payload = JSON.parse(raw);
     } catch (_) {
-      const errorCode = raw.match(/<errMsg>([^<]+)<\/errMsg>/i)?.[1] || "";
-      const authMessage = raw.match(/<returnAuthMsg>([^<]+)<\/returnAuthMsg>/i)?.[1] || "";
-      const providerMessage = errorCode || authMessage;
+      const xmlValue = (tag) => {
+        const match = raw.match(new RegExp("<" + tag + ">([\\s\\S]*?)</" + tag + ">", "i"));
+        return match?.[1]?.replace(/<!\\[CDATA\\[|\\]\\]>/g, "").trim() || "";
+      };
+      const providerCode =
+        xmlValue("returnReasonCode") ||
+        xmlValue("resultCode") ||
+        xmlValue("errCode") ||
+        xmlValue("code");
+      const providerMessage =
+        xmlValue("returnAuthMsg") ||
+        xmlValue("errMsg") ||
+        xmlValue("resultMsg") ||
+        xmlValue("returnReason") ||
+        xmlValue("message");
+      const contentType = response.headers.get("content-type") || "unknown";
+      const safeMessage = [providerCode, providerMessage].filter(Boolean).join(" / ");
       return json({
         success: false,
         code: "NON_JSON_RESPONSE",
-        message: providerMessage
-          ? "공공데이터 API가 오류 응답을 반환했습니다. (" + providerMessage + ") 인증키, 활용신청 승인 상태, 요청 변수를 확인해 주세요."
-          : "API가 JSON이 아닌 응답을 반환했습니다. API 명세와 요청 변수 설정을 확인해 주세요.",
+        message: safeMessage
+          ? "공공데이터 API 응답 확인 필요 (" + safeMessage.slice(0, 240) + "). 인증키, 승인 상태, 요청 변수를 확인해 주세요."
+          : "공공데이터 API가 JSON 대신 다른 형식으로 응답했습니다. 응답 형식: " + contentType + ". API 주소와 요청 변수를 확인해야 합니다.",
         items: []
       }, 502);
     }
