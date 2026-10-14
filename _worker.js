@@ -81,7 +81,7 @@ async function supports(request, env) {
   const numOfRows = Math.min(100, Math.max(1, Number.parseInt(incoming.searchParams.get("numOfRows") || "100", 10) || 100));
   const upstream = new URL(API_ENDPOINT);
   upstream.searchParams.set("serviceKey", serviceKeyValue(env.DATA_GO_KR_SERVICE_KEY.trim()));
-  upstream.searchParams.set("_type", "json");
+  upstream.searchParams.set("dataType", "json");
   upstream.searchParams.set("pageNo", String(pageNo));
   upstream.searchParams.set("numOfRows", String(numOfRows));
 
