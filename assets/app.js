@@ -7,6 +7,7 @@ let apiSource = "";
 const $ = (id) => document.getElementById(id);
 // 외부 API 데이터 연결 시 javascript: 등 위험한 URL 스킴 차단 (http/https만 허용)
 function safeUrl(u){
+ if (!u) return "#";
  try{ const p = new URL(u, location.href); return (p.protocol === "https:" || p.protocol === "http:") ? p.href : "#"; }
  catch(e){ return "#"; }
 }
@@ -40,8 +41,10 @@ function renderResults(){
      const dd = document.createElement("dd"); dd.textContent = v;
      row.append(dt,dd); meta.append(row);
    });
-   const link = document.createElement("a"); link.className = "card-link"; link.href = safeUrl(item.url); link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "공식 데이터 포털 열기 ↗";
-   card.append(top,title,summary,meta,link); results.append(card);
+   const link = document.createElement("a"); link.className = "card-link"; link.href = safeUrl(item.url); link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "공식 공고문 열기 ↗";
+   card.append(top,title,summary,meta);
+   if (item.url) card.append(link);
+   results.append(card);
  });
  if ($("resultCount")) $("resultCount").textContent = apiError ? "연결 확인 필요" : `${filtered.length}개 공고`;
  if ($("emptyState")) {
