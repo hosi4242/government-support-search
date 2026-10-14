@@ -1,77 +1,49 @@
-# 지원금 찾기 — 통합검색 기본 틀
+# 지원금 찾기 — Cloudflare Pages 운영 준비
 
-정적 HTML/CSS/JavaScript로 만든 초안입니다. GitHub + Cloudflare Pages에 올릴 수 있도록 프레임워크나 빌드 단계 없이 구성했습니다.
+정적 HTML/CSS/JavaScript 사이트이며, 공고 API는 Cloudflare Pages Function을 통해 서버 측에서 호출합니다. 브라우저 코드에 서비스 키를 넣지 않습니다.
 
-## 포함 파일
-- `index.html`: 정부지원금 전체 검색
-- `small-business.html`: 소상공인 지원사업 검색
-- `guide.html`: 이용 안내
-- `about.html`: 서비스 소개
-- `privacy.html`: 개인정보처리방침 초안 — 실제 운영 내용에 맞춰 반드시 수정
-- `sources.html`: 공공데이터 출처 안내
-- `contact.html`: 문의 안내 — 실제 이메일 입력 필요
-- `assets/style.css`: 반응형 스타일
-- `assets/app.js`: 검색 필터와 시연용 예시 데이터
-- `404.html`: 없는 주소 안내 (Cloudflare Pages가 자동 사용)
-- `_headers`: 기본 보안 헤더 (Cloudflare Pages 전용 설정 파일)
-- `robots.txt`, `sitemap.xml`: 배포 전에 도메인 수정 필요
+## 배포 설정
+- Framework preset: `None`
+- Build command: `exit 0`
+- Build output directory: `.` (저장소 루트)
+- Root directory: 비워두기
+- Production branch: `main` (기능 브랜치 검토 후 병합)
 
-## 현재 상태를 꼭 알아두세요
-**실제 공공데이터 API는 아직 연결되어 있지 않습니다.** 검색 결과는 UI 확인용 예시입니다. 실제 서비스로 공개하기 전에 `assets/app.js`의 `DEMO_DATA`를 실제 API 데이터로 교체하고, 모든 결과에 정확한 공식 원문 링크와 갱신 시각을 표시해야 합니다.
+## 공공데이터 API 연결 (필수)
+공공데이터포털의 [중소벤처기업부_중소기업 지원사업 공고 조회 서비스](https://www.data.go.kr/data/15157820/openapi.do)를 활용 신청하세요. 이 API는 최신 중앙부처·지자체·유관기관 지원사업 공고 정보를 제공하며, 일간 갱신됩니다. 이용 범위는 출처표시·변경금지(공공저작물 제3유형)이며, 개발단계 자동승인과 운영단계 심의승인이 표시되어 있으므로 **운영 공개 전 운영단계 승인 여부를 확인**해야 합니다.
 
-## API 연결 순서
-1. 공공데이터포털에서 데이터셋을 선택하고 이용 조건, 출처 표시, 운영 승인, 호출 한도를 확인합니다.
-2. 서비스 키가 브라우저에 노출되지 않도록 가능하면 Cloudflare Worker 같은 서버 측 프록시를 사용합니다.
-3. 공고 데이터를 정규화해 `id`, `title`, `category`, `region`, `scope`, `agency`, `period`, `target`, `summary`, `url`, `updatedAt` 형태로 변환합니다.
-4. `assets/app.js`에서 `DEMO_DATA`를 API 응답으로 대체하고, 로딩·오류·빈 결과 상태를 구현합니다.
-5. API가 일시 중단되어도 사이트가 깨지지 않도록 마지막 정상 갱신 데이터나 안내 메시지를 준비합니다.
+Cloudflare 대시보드 → Workers & Pages → 해당 Pages 프로젝트 → Settings → Variables and Secrets에서 다음을 설정하고 재배포하세요.
 
-우선 검토할 API:
-- https://www.data.go.kr/data/15157820/openapi.do — 중소벤처기업부_중소기업 지원사업 공고 조회 서비스(기업마당). 공고명·공고URL·신청기간·지원대상·사업신청URL 등 제공이 확인됨. 응답이 XML일 수 있으므로 Worker에서 JSON으로 변환 권장
-- https://www.data.go.kr/data/15113297/openapi.do — **제목·제공 항목을 확인하지 못함.** 사용 전 데이터셋 이름과 이용 조건을 직접 확인
-- https://www.data.go.kr/
+| 이름 | 종류 | 값 |
+|---|---|---|
+| `SUPPORT_API_ENDPOINT` | Variable | 공공데이터포털 API 상세 화면의 정확한 요청 URL(기능 선택 후 확인) |
+| `DATA_GO_KR_SERVICE_KEY` | **Encrypt / Secret** | 발급받은 서비스 키(디코딩된 원문 키 권장) |
+| `SUPPORT_API_KEY_PARAM` | Variable (선택) | 기본값 `serviceKey`; API 명세의 인증키 파라미터가 다르면 변경 |
+| `SUPPORT_API_FORMAT_PARAM` | Variable (선택) | 기본값 `_type`; API 명세에 따라 `type` 등으로 변경 |
+| `SUPPORT_API_PAGE_PARAM` | Variable (선택) | 기본값 `pageNo` |
+| `SUPPORT_API_SIZE_PARAM` | Variable (선택) | 기본값 `numOfRows` |
 
-API별 이용 조건은 서로 다를 수 있으므로 실제 사용 전 해당 페이지의 최신 안내를 확인하세요.
+API 요청 URL은 API 명세에 나온 **요청주소/기능별 URL**을 사용해야 하며, 데이터셋 소개 페이지 URL 자체를 넣으면 안 됩니다. 이 사이트는 JSON 응답을 기대합니다. API가 JSON을 지원하지 않으면 응답 형식 파라미터를 명세에 맞춰 조정하세요.
 
-## Google AdSense
-- 이 템플릿에는 광고가 실제 송출되지 않습니다. 광고 영역은 자리 표시자입니다.
-- AdSense 승인 후 `index.html` 및 필요한 페이지의 주석 처리된 광고 스크립트에 실제 게시자 ID를 입력해 활성화하세요.
-- 자동 광고 또는 광고 단위를 적용할 때 검색 버튼·필터·공식 신청 링크와 오인될 배치를 피하고, 광고가 본문을 가리지 않도록 하세요.
-- 개인정보처리방침에 실제 광고·쿠키·데이터 처리 방식을 정확히 반영하세요.
-- 공고 목록을 그대로 복제하는 데 그치지 말고, 지원 조건 확인 방법, 신청 단계, 공식 원문 링크, 데이터 갱신 시각 등 독자에게 실질적인 가치를 제공하세요. AdSense 승인은 보장되지 않습니다.
+현재 사이트는 키가 없거나 API가 실패할 경우 예시 공고를 대신 보여주지 않고 오류 안내를 표시합니다. 운영 키를 설정하기 전에는 실제 공고가 표시되지 않습니다.
 
-## Cloudflare Pages에 배포
-1. ZIP 압축을 풀고, **`government-support-search-starter` 폴더 안의 내용물**(폴더 자체가 아님)을 GitHub 저장소 루트에 업로드합니다. 폴더째 올리면 404가 납니다.
-2. Cloudflare Pages에서 해당 저장소를 연결합니다.
-3. 프레임워크 프리셋은 `None`, 빌드 명령은 비워두고, 출력 디렉터리는 `/` 또는 프로젝트 루트 설정을 사용합니다(기존 프로젝트 설정과 일치하는지 확인).
-4. `robots.txt`, `sitemap.xml` 안의 `YOUR-DOMAIN.example`을 실제 도메인으로 바꿉니다. (sitemap은 Cloudflare Pages의 정식 주소인 `.html` 없는 형태로 작성되어 있습니다.)
-5. 배포 후 모바일 화면, 검색 필터, 모든 하위 페이지, 외부 링크, 개인정보처리방침을 확인합니다.
+## 검색엔진 노출
+- `robots.txt`는 크롤링을 허용하고 sitemap 경로를 알립니다.
+- `sitemap.xml`은 현재 기본 도메인 `https://government-support-search.pages.dev` 기준입니다. Cloudflare Pages의 실제 주소 또는 사용자 지정 도메인이 다르면 robots.txt와 sitemap.xml의 도메인을 함께 바꾸세요.
+- Google Search Console과 네이버 서치어드바이저에 실제 배포 도메인을 등록하고 sitemap을 제출하세요.
+- 크롤링 허용이 색인이나 순위를 보장하지는 않습니다. 실제 도메인, 유효한 공고 링크, 운영자 연락처, 개인정보처리방침을 확인하세요.
 
-## 배포 전 체크리스트
-- [ ] 실제 API 연동 및 운영 단계 승인 확인
-- [ ] 예시 데이터 전부 제거 (실데이터 연결 전까지는 검색 엔진에 노출되지 않도록 각 페이지 `<head>`에 `<meta name="robots" content="noindex">` 추가 고려)
-- [ ] 모든 공식 신청 링크 검증
-- [ ] 최종 갱신 시각 표시
-- [ ] 실제 운영자 이메일 입력
-- [ ] AdSense 활성화 시 `_headers`에 CSP를 추가한다면 Google 광고 도메인 허용 필요
-- [ ] 개인정보처리방침을 실제 수집·광고·분석 설정에 맞게 수정
-- [ ] 실제 도메인으로 sitemap/robots 수정
-- [ ] 모바일·키보드 접근성·오류 상태 점검
-- [ ] AdSense 정책 및 콘텐츠 가치 검토
+## 중요한 운영 점검
+1. API 인증키를 HTML/JS, GitHub 파일, 공개 이슈에 절대 입력하지 마세요.
+2. 공공데이터포털의 이용 조건과 운영단계 승인 상태를 확인하세요.
+3. 각 결과의 공식 공고 링크, 지원대상, 신청 기간을 원문과 대조하세요. API 응답 필드 이름이 데이터셋 명세와 다르면 `functions/api/supports.js`의 필드 별칭을 조정해야 합니다.
+4. `contact.html`와 `privacy.html`의 운영자 이메일 자리표시자를 실제 연락처 및 운영 방식에 맞게 수정하세요.
+5. 현재 검색 결과는 브라우저에서 API를 조회해 표시합니다. 정적 페이지에 결과별 서버 렌더링 URL을 생성하지 않으므로 검색엔진은 개별 공고를 색인하지 않을 수 있습니다. 우선 서비스 소개·검색 랜딩 페이지를 색인 대상으로 둡니다.
 
-
-## 변경 이력 (기술 검수)
-- 수정: "소상공인" 필터가 동작하지 않던 버그 (항상 전체 결과 표시)
-- 수정: 소상공인 페이지 지역 목록이 8개뿐이던 문제 → 17개 시·도 전체
-- 보완: 외부 링크 URL 스킴 검증(`safeUrl`), 필터 이벤트 중복 제거
-- 보완: 접근성 (본문 바로가기, 포커스 표시, 색 대비, aria-current, 결과 수 안내를 스크린리더용 `role="status"`로 이동)
-- 보완: 상대경로로 변경해 로컬(file://) 미리보기 가능, 푸터·메뉴 링크 전 페이지 통일, 파비콘 추가
-- 추가: `404.html`, `_headers`, sitemap 정식 URL 형식
-
-## GitHub Pages 배포
-
-1. 저장소의 **Settings → Pages**에서 **Deploy from a branch**를 선택합니다.
-2. Branch는 `main`, 폴더는 `/ (root)`로 설정하고 저장합니다.
-3. 배포가 완료되면 `https://hosi4242.github.io/government-support-search/`에서 사이트를 확인합니다.
-4. 실제 API 연동과 개인정보·문의 정보 확정 전까지는 시연용 데이터와 검색엔진 비노출 설정을 유지합니다.
-5. 운영을 시작할 때 `robots.txt`, `sitemap.xml`, 각 페이지의 `noindex` 설정을 실제 데이터와 도메인에 맞게 갱신합니다.
+## 파일 구조
+- `index.html`: 통합검색
+- `small-business.html`: 소상공인 검색
+- `guide.html`, `about.html`, `sources.html`, `privacy.html`, `contact.html`: 안내 페이지
+- `assets/app.js`: API 결과 필터 및 카드 표시
+- `functions/api/supports.js`: API 키를 숨기는 서버 측 프록시
+- `robots.txt`, `sitemap.xml`: 검색엔진 설정
