@@ -8,22 +8,16 @@ const $ = (id) => document.getElementById(id);
 // 외부 API 데이터 연결 시 javascript: 등 위험한 URL 스킴 차단 (http/https만 허용)
 function cleanApiText(value){
  if (value == null) return "";
- let text = String(value);
- // Decode HTML entities, including API responses that were encoded more than once.
- for (let i = 0; i < 3; i++) {
-   const doc = new DOMParser().parseFromString(text, "text/html");
-   const decoded = doc.body.textContent || "";
-   if (decoded === text) break;
-   text = decoded;
- }
- // Keep paragraph and list breaks before removing remaining markup.
- text = text
+ return String(value)
+   .replace(/&nbsp;|&#160;|&#xA0;/gi, " ")
+   .replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
+   .replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'")
+   .replace(/&amp;/gi, "&")
    .replace(/<\s*\/p\s*>/gi, "\n")
    .replace(/<\s*br\s*\/?\s*>/gi, "\n")
-   .replace(/<\s*\/li\s*>/gi, "\n");
- const doc = new DOMParser().parseFromString(text, "text/html");
- return (doc.body.textContent || text)
-   .replace(/\u00a0/g, " ")
+   .replace(/<\s*\/li\s*>/gi, "\n")
+   .replace(/<[^>]*>/g, "")
+   .replace(/&nbsp;|&#160;|&#xA0;/gi, " ")
    .replace(/[ \t]+\n/g, "\n")
    .replace(/\n[ \t]+/g, "\n")
    .replace(/\n{3,}/g, "\n\n")
