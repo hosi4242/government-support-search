@@ -85,7 +85,7 @@ async function loadSupportData() {
       notice.hidden = false;
       notice.replaceChildren();
       const strong = document.createElement("strong"); strong.textContent = "공식 공공데이터";
-      const message = document.createElement("p"); message.textContent = "중소벤처기업부·기업마당 지원사업 공고 API를 통해 불러온 정보입니다. 신청 자격과 기간은 공식 공고문에서 최종 확인하세요.";
+      const message = document.createElement("p"); message.textContent = "출처: 중소벤처기업부·기업마당 및 공공데이터포털. 공고 원문과 신청 자격·기간은 공식 공고문에서 최종 확인하세요.";
       notice.append(strong, message);
     }
     renderResults();
