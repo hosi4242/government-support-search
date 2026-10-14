@@ -8,9 +8,18 @@ const $ = (id) => document.getElementById(id);
 // 외부 API 데이터 연결 시 javascript: 등 위험한 URL 스킴 차단 (http/https만 허용)
 function cleanApiText(value){
  if (value == null) return "";
- const input = String(value);
+ const input = String(value)
+   .replace(/<\s*\/p\s*>/gi, "\n")
+   .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+   .replace(/<\s*\/li\s*>/gi, "\n");
  const doc = new DOMParser().parseFromString(input, "text/html");
- return (doc.body.textContent || "").replace(/\\u00a0/g, " ").replace(/[ \\t]+\\n/g, "\\n").replace(/\\n[ \\t]+/g, "\\n").replace(/\\n{3,}/g, "\\n\\n").replace(/[ \\t]{2,}/g, " ").trim();
+ return (doc.body.textContent || "")
+   .replace(/\u00a0/g, " ")
+   .replace(/[ \t]+\n/g, "\n")
+   .replace(/\n[ \t]+/g, "\n")
+   .replace(/\n{3,}/g, "\n\n")
+   .replace(/[ \t]{2,}/g, " ")
+   .trim();
 }
 function safeUrl(u){
  if (!u) return "#";
