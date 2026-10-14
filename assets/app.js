@@ -43,7 +43,7 @@ function renderResults(){
    const link = document.createElement("a"); link.className = "card-link"; link.href = safeUrl(item.url); link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "공식 데이터 포털 열기 ↗";
    card.append(top,title,summary,meta,link); results.append(card);
  });
- if ($("resultCount")) $("resultCount").textContent = apiError ? "연결 확인 필요" : `${"${filtered.length}"}개 공고`;
+ if ($("resultCount")) $("resultCount").textContent = apiError ? "연결 확인 필요" : `${filtered.length}개 공고`;
  if ($("emptyState")) {
    $("emptyState").hidden = filtered.length !== 0 && !apiError;
    const emptyTitle = $("emptyState").querySelector("strong");
