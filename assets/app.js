@@ -34,12 +34,31 @@ function renderResults(){
    top.append(tag,deadline);
    const title = document.createElement("h3"); title.textContent = item.title;
    const summary = document.createElement("p"); summary.className = "summary"; summary.textContent = item.summary;
-   // 공고 상세 원문이 API에 포함된 경우에만 별도 영역으로 표시합니다.
+   // 상세 공고의 HTML 줄바꿈과 붙어 있는 문장을 읽기 좋은 문단으로 정리합니다.
    const detailText = item.detail || item.content || item.contents || item.description || item.body || "";
    const detail = document.createElement("div"); detail.className = "notice-detail";
    if (typeof detailText === "string" && detailText.trim()) {
-     detailText.replace(/\r\n?/g, "\n").split(/\n{2,}|(?<=[.!?。])\s+(?=[가-힣A-Z0-9])/u).map(part => part.trim()).filter(Boolean).forEach(part => {
-       const paragraph = document.createElement("p"); paragraph.textContent = part; detail.append(paragraph);
+     const normalized = detailText
+       .replace(/<\s*br\s*\/?>/gi, "\n")
+       .replace(/<\/(?:p|div|li|tr|h[1-6]|section|article)\s*>/gi, "\n")
+       .replace(/<li\b[^>]*>/gi, "\n• ")
+       .replace(/<[^>]*>/g, " ")
+       .replace(/&nbsp;|&#160;/gi, " ")
+       .replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
+       .replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'")
+       .replace(/\r\n?/g, "\n")
+       .replace(/[ \t\u00a0]+/g, " ")
+       .replace(/ *\n */g, "\n")
+       .replace(/\n{2,}/g, "\n")
+       .trim();
+     const chunks = normalized
+       .replace(/(?<!\n)(?=(?:■|●|○|◆|▶|※|[•▪‣]|\d+[.)、]|[가-힣][.)、]|\[[^\]]{1,24}\]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\s*[:：])/g, "\n")
+       .replace(/(?<=[.!?。])(?=[가-힣A-Z0-9“"‘'])/g, "\n")
+       .split(/\n+/).map(part => part.trim()).filter(Boolean);
+     chunks.forEach(part => {
+       const paragraph = document.createElement("p");
+       paragraph.textContent = part;
+       detail.append(paragraph);
      });
    }
    const meta = document.createElement("dl"); meta.className = "meta-list";
