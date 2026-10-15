@@ -214,7 +214,12 @@ async function syncAllSupports(env) {
   let expectedTotal = null;
   for (let pageNo = 1; pageNo <= API_MAX_PAGES; pageNo += 1) {
     const { rows, totalCount } = await fetchApiPage(env, pageNo, API_PAGE_SIZE, false);
-    if (pageNo === 1) expectedTotal = totalCount;
+    if (pageNo === 1) {
+      expectedTotal = totalCount;
+      if (expectedTotal !== null && expectedTotal > API_PAGE_SIZE * API_MAX_PAGES) {
+        throw new Error("The API reports more than the configured 10,000-record safety limit. Increase the pagination limit before syncing; existing D1 data was left unchanged.");
+      }
+    }
     collected.push(...rows.map((row, index) => mapRow(row, ((pageNo - 1) * API_PAGE_SIZE) + index, fetchedAt)).filter(item => item.title));
 
     if (expectedTotal !== null) {
@@ -222,6 +227,8 @@ async function syncAllSupports(env) {
       if (pageNo >= Math.min(totalPages, API_MAX_PAGES)) break;
     } else if (rows.length < API_PAGE_SIZE) {
       break;
+    } else if (pageNo === API_MAX_PAGES) {
+      throw new Error("Pagination reached the 10,000-record safety limit without a provider total count. Existing D1 data was left unchanged.");
     }
   }
 
@@ -240,6 +247,11 @@ async function syncAllSupports(env) {
   for (let offset = 0; offset < statements.length; offset += 50) {
     await env.SUPPORTS_DB.batch(statements.slice(offset, offset + 50));
   }
+  // Only prune announcements absent from the provider after every page was fetched
+  // and every upsert succeeded. A failed/incomplete sync never runs this cleanup.
+  await env.SUPPORTS_DB.prepare(
+    "DELETE FROM support_announcements WHERE fetched_at < ?"
+  ).bind(fetchedAt).run();
   console.log("Support announcement sync completed.", JSON.stringify({ count: items.length, fetchedAt, apiTotalCount: expectedTotal }));
   return { count: items.length, fetchedAt, apiTotalCount: expectedTotal };
 }
