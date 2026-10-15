@@ -135,7 +135,8 @@ async function supports(request, env) {
     const rows = normalizeRows(payload);
     const items = rows.map((row, index) => {
       const title = firstValue(row, ["pblancNm","bizNm","title","announcementTitle","공고명","nttSj","bizTitle","사업명","사업공고명"]);
-      const summary = firstValue(row, ["bsnsSumryCn","bizSumry","summary","사업개요내용","description","content","pblancCn","공고내용"], "상세 내용은 공식 공고문에서 확인해 주세요.");
+      const summary = firstValue(row, ["bsnsSumryCn","bizSumry","summary","사업개요내용","bizIntro","intro"], "상세 내용은 아래 공고 내용 또는 공식 공고문에서 확인해 주세요.");
+      const detail = firstValue(row, ["pblancCn","pblancContents","pblancDtlCn","bizDetail","detail","contents","content","description","body","dtlCn","bsnsDtlCn","공고내용","공고상세내용","사업내용","지원내용"], "");
       const target = firstValue(row, ["suptTrgt","suptTrgtNm","target","지원대상","지원 대상","trgt","trgetNm","지원대상내용"], "공고 원문 확인");
       const agency = firstValue(row, ["suptInstNm","excInstNm","agency","기관명","organNm","pblancInstNm","소관명","수행기관명","주관기관"], "공고 원문 확인");
       const period = firstValue(row, ["reqstBeginEndDe","reqstPeriod","applicationPeriod","신청기간","period","reqstDe","신청기간내용"]);
@@ -149,6 +150,7 @@ async function supports(request, env) {
         id,
         title,
         summary,
+        detail,
         target,
         agency,
         period: period || [begin, end].filter(Boolean).join(" ~ ") || "공고 원문 확인",
