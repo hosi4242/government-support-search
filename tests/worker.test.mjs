@@ -74,11 +74,19 @@ test("scheduled sync paginates, upserts rows, and never deletes existing data", 
     headers: { "content-type": "application/json" }
   });
   const batches = [];
+  const cleanupRuns = [];
   const db = {
     prepare(sql) {
       return {
         bind(...values) {
-          return { sql, values };
+          return {
+            sql,
+            values,
+            async run() {
+              cleanupRuns.push({ sql, values });
+              return { success: true };
+            }
+          };
         }
       };
     },
@@ -98,6 +106,8 @@ test("scheduled sync paginates, upserts rows, and never deletes existing data", 
     assert.doesNotMatch(batches[0][0].sql, /DELETE FROM/i);
     assert.equal(batches[0][0].values[0], "A1");
     assert.equal(batches[0][1].values[0], "A2");
+    assert.equal(cleanupRuns.length, 1);
+    assert.match(cleanupRuns[0].sql, /DELETE FROM support_announcements WHERE fetched_at < \?/);
   } finally {
     globalThis.fetch = originalFetch;
   }
