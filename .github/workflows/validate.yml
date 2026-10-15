@@ -1,0 +1,45 @@
+name: Validate site
+
+on:
+  pull_request:
+    branches:
+      - workers-api-integration
+    paths:
+      - '**.js'
+      - 'wrangler.jsonc'
+      - '.github/workflows/validate.yml'
+      - 'assets/**'
+      - '*.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: JavaScript syntax and config validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check Worker JavaScript syntax
+        run: node --check _worker.js
+
+      - name: Check browser JavaScript syntax
+        run: node --check assets/app.js
+
+      - name: Validate Wrangler JSONC configuration
+        run: node -e "const fs=require('node:fs'); const text=fs.readFileSync('wrangler.jsonc','utf8').replace(/\/\*[\s\S]*?\*\//g,'').replace(/(^|[^:])\/\/.*$/gm,'$1'); JSON.parse(text); console.log('wrangler.jsonc is valid JSONC');"
+
+      - name: Check required static pages
+        run: |
+          test -f index.html
+          test -f small-business.html
+          test -f guide.html
+          test -f assets/style.css
