@@ -104,12 +104,16 @@ test("scheduled sync paginates, upserts rows, and never deletes existing data", 
       DATA_GO_KR_SERVICE_KEY: "test-key",
       SUPPORTS_DB: db
     });
-    assert.equal(batches.length, 1);
-    assert.equal(batches[0].length, 2);
+    assert.deepEqual(requestedPages, [1, 2]);
+    assert.equal(batches.length, 3);
+    assert.equal(batches[0].length, 50);
+    assert.equal(batches[1].length, 50);
+    assert.equal(batches[2].length, 1);
     assert.match(batches[0][0].sql, /ON CONFLICT\(id\) DO UPDATE/);
     assert.doesNotMatch(batches[0][0].sql, /DELETE FROM/i);
     assert.equal(batches[0][0].values[0], "A1");
     assert.equal(batches[0][1].values[0], "A2");
+    assert.equal(batches[2][0].values[0], "A101");
     assert.equal(cleanupRuns.length, 1);
     assert.match(cleanupRuns[0].sql, /DELETE FROM support_announcements WHERE fetched_at < \?/);
   } finally {
