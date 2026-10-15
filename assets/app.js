@@ -52,8 +52,8 @@ function renderResults(){
        .replace(/\n{2,}/g, "\n")
        .trim();
      const chunks = normalized
-       .replace(/(?<!\n)(?=(?:■|●|○|◆|▶|※|[•▪‣]|\d+[.)、]|[가-힣][.)、]|\[[^\]]{1,24}\]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\s*[:：])/g, "\n")
-       .replace(/(?<=[.!?。])(?=[가-힣A-Z0-9“"‘'])/g, "\n")
+       .replace(/([.!?。])(?=[가-힣A-Z0-9“"‘'])/g, "$1\n")
+       .replace(/(■|●|○|◆|▶|※|[•▪‣]|\d+[.)、]|[가-힣][.)、]|\[[^\]]{1,24}\]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\s*[:：])/g, "\n$1")
        .split(/\n+/).map(part => part.trim()).filter(Boolean);
      chunks.forEach(part => {
        const paragraph = document.createElement("p");
