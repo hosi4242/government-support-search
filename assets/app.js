@@ -38,7 +38,7 @@ function renderResults(){
    const detailText = item.detail || item.content || item.contents || item.description || item.body || "";
    const detail = document.createElement("div"); detail.className = "notice-detail";
    if (typeof detailText === "string" && detailText.trim()) {
-     detailText.replace(/\\r\\n?/g, "\\n").split(/\\n{2,}|(?<=[.!?。])\\s+(?=[가-힣A-Z0-9])/u).map(part => part.trim()).filter(Boolean).forEach(part => {
+     detailText.replace(/\r\n?/g, "\n").split(/\n{2,}|(?<=[.!?。])\s+(?=[가-힣A-Z0-9])/u).map(part => part.trim()).filter(Boolean).forEach(part => {
        const paragraph = document.createElement("p"); paragraph.textContent = part; detail.append(paragraph);
      });
    }
