@@ -34,6 +34,14 @@ function renderResults(){
    top.append(tag,deadline);
    const title = document.createElement("h3"); title.textContent = item.title;
    const summary = document.createElement("p"); summary.className = "summary"; summary.textContent = item.summary;
+   // 공고 상세 원문이 API에 포함된 경우에만 별도 영역으로 표시합니다.
+   const detailText = item.detail || item.content || item.contents || item.description || item.body || "";
+   const detail = document.createElement("div"); detail.className = "notice-detail";
+   if (typeof detailText === "string" && detailText.trim()) {
+     detailText.replace(/\\r\\n?/g, "\\n").split(/\\n{2,}|(?<=[.!?。])\\s+(?=[가-힣A-Z0-9])/u).map(part => part.trim()).filter(Boolean).forEach(part => {
+       const paragraph = document.createElement("p"); paragraph.textContent = part; detail.append(paragraph);
+     });
+   }
    const meta = document.createElement("dl"); meta.className = "meta-list";
    [["주관 기관",item.agency],["지원 대상",item.target],["신청 기간",item.period]].forEach(([k,v])=>{
      const row = document.createElement("div"); row.className = "meta-row";
@@ -42,7 +50,9 @@ function renderResults(){
      row.append(dt,dd); meta.append(row);
    });
    const link = document.createElement("a"); link.className = "card-link"; link.href = safeUrl(item.url); link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "공식 공고문 열기 ↗";
-   card.append(top,title,summary,meta);
+   card.append(top,title,summary);
+   if (detail.childElementCount) card.append(detail);
+   card.append(meta);
    if (item.url) card.append(link);
    results.append(card);
  });
