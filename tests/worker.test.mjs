@@ -66,13 +66,17 @@ test("missing API secret returns a safe configuration error", async () => {
 
 test("scheduled sync paginates, upserts rows, and never deletes existing data", async () => {
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response(JSON.stringify(apiPayload([
-    apiRow("A1", "첫 번째 공고"),
-    apiRow("A2", "두 번째 공고")
-  ], 2)), {
-    status: 200,
-    headers: { "content-type": "application/json" }
-  });
+  const allRows = Array.from({ length: 101 }, (_, index) => apiRow("A" + (index + 1), "지원사업 공고 " + (index + 1)));
+  const requestedPages = [];
+  globalThis.fetch = async (input) => {
+    const pageNo = Number(new URL(String(input)).searchParams.get("pageNo"));
+    requestedPages.push(pageNo);
+    const rows = allRows.slice((pageNo - 1) * 100, pageNo * 100);
+    return new Response(JSON.stringify(apiPayload(rows, allRows.length)), {
+      status: 200,
+      headers: { "content-type": "application/json" }
+    });
+  };
   const batches = [];
   const cleanupRuns = [];
   const db = {
