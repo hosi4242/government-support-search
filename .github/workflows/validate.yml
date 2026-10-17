@@ -21,3 +21,5 @@ jobs:
           node-version: 22
       - name: Run regression tests
         run: node --test tests/worker.test.mjs
+      - name: Validate Wrangler deployment bundle
+        run: npx wrangler@4 deploy --dry-run
