@@ -86,6 +86,10 @@ test("scheduled sync paginates, upserts rows, and never deletes existing data", 
   const db = {
     prepare(sql) {
       return {
+        async run() {
+          cleanupRuns.push({ sql, values: [] });
+          return { success: true };
+        },
         bind(...values) {
           return {
             sql,
@@ -118,8 +122,9 @@ test("scheduled sync paginates, upserts rows, and never deletes existing data", 
     assert.equal(batches[0][0].values[0], "A1");
     assert.equal(batches[0][1].values[0], "A2");
     assert.equal(batches[2][0].values[0], "A101");
-    assert.equal(cleanupRuns.length, 1);
-    assert.match(cleanupRuns[0].sql, /DELETE FROM support_announcements WHERE fetched_at < \?/);
+    assert.equal(cleanupRuns.length, 2);
+    assert.match(cleanupRuns[0].sql, /CREATE TABLE IF NOT EXISTS support_announcements/);
+    assert.match(cleanupRuns[1].sql, /DELETE FROM support_announcements WHERE fetched_at < \?/);
   } finally {
     globalThis.fetch = originalFetch;
   }
