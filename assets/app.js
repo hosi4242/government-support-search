@@ -22,17 +22,25 @@ function cleanApiText(value){
 }
 function splitReadableParagraphs(value) {
  const normalized = cleanApiText(value)
-   .replace(/<\s*br\s*\/?\s*>/gi, "\n")
-   .replace(/\r\n?/g, "\n")
-   .replace(/[ \t\u00a0]+/g, " ")
-   .replace(/ *\n */g, "\n")
-   .replace(/\n{2,}/g, "\n")
+   .replace(/\\r\\n?/g, "\\n")
+   .replace(/[ \\t\\u00a0]+/g, " ")
+   .replace(/ *\\n */g, "\\n")
    .trim();
  if (!normalized) return [];
- return normalized
-   .split(/\n|(?<=[.!?。])\s+(?=[가-힣“"‘])/)
-   .flatMap(part => part.split(/(?=■|●|○|◆|▶|※|[•▪‣]|\d+[.)、]|[가-힣][.)、]|\[[^\]]{1,24}\]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\s*[:：])/))
-   .map(part => part.trim()).filter(Boolean);
+ const parts = normalized.split("\\n");
+ const output = [];
+ for (const raw of parts) {
+   const item = raw.trim();
+   if (!item) continue;
+   const sentences = item.split(/(?<=[.!?。]) +(?=[가-힣])/);
+   for (const sentence of sentences) {
+     const headingParts = sentence.split(/(?=■|●|○|◆|▶|※|[•▪‣]|\\d+[.)、]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\\s*[:：])/);
+     for (const heading of headingParts) {
+       if (heading.trim()) output.push(heading.trim());
+     }
+   }
+ }
+ return output;
 }
 // 외부 API 데이터 연결 시 javascript: 등 위험한 URL 스킴 차단 (http/https만 허용)
 function safeUrl(u){
