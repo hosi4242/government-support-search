@@ -34,9 +34,6 @@ function splitReadableParagraphs(value) {
    .flatMap(part => part.split(/(?=■|●|○|◆|▶|※|[•▪‣]|\d+[.)、]|[가-힣][.)、]|\[[^\]]{1,24}\]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\s*[:：])/))
    .map(part => part.trim()).filter(Boolean);
 }
-   .replace(/[ \t]{2,}/g, " ")
-   .trim();
-}
 // 외부 API 데이터 연결 시 javascript: 등 위험한 URL 스킴 차단 (http/https만 허용)
 function safeUrl(u){
  if (!u) return "#";
