@@ -17,9 +17,23 @@ function cleanApiText(value){
    .replace(/<\s*\/li\s*>/gi, "\n")
    .replace(/<[^>]*>/g, "")
    .replace(/&nbsp;|&#160;|&#xA0;/gi, " ")
-   .replace(/[ \t]+\n/g, "\n")
-   .replace(/\n[ \t]+/g, "\n")
-   .replace(/\n{3,}/g, "\n\n")
+   .replace(/[ \t]+/g, " ")
+   .trim();
+}
+function splitReadableParagraphs(value) {
+ const normalized = cleanApiText(value)
+   .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+   .replace(/\r\n?/g, "\n")
+   .replace(/[ \t\u00a0]+/g, " ")
+   .replace(/ *\n */g, "\n")
+   .replace(/\n{2,}/g, "\n")
+   .trim();
+ if (!normalized) return [];
+ return normalized
+   .split(/\n|(?<=[.!?。])\s+(?=[가-힣“"‘])/)
+   .flatMap(part => part.split(/(?=■|●|○|◆|▶|※|[•▪‣]|\d+[.)、]|[가-힣][.)、]|\[[^\]]{1,24}\]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\s*[:：])/))
+   .map(part => part.trim()).filter(Boolean);
+}
    .replace(/[ \t]{2,}/g, " ")
    .trim();
 }
@@ -51,7 +65,7 @@ function renderResults(){
    const deadline = document.createElement("span"); deadline.className = "deadline"; deadline.textContent = item.period && item.period !== "공고 원문 확인" ? item.period : "공고 정보";
    top.append(tag,deadline);
    const title = document.createElement("h3"); title.textContent = item.title;
-   const summary = document.createElement("p"); summary.className = "summary"; summary.textContent = cleanApiText(item.summary);
+   const summary = document.createElement("div"); summary.className = "summary";\n    splitReadableParagraphs(item.summary).forEach(text => { const p = document.createElement("p"); p.textContent = text; summary.append(p); });
    // 상세 공고의 HTML 줄바꿈과 붙어 있는 문장을 읽기 좋은 문단으로 정리합니다.
    const detailText = item.detail || item.content || item.contents || item.description || item.body || "";
    const detail = document.createElement("div"); detail.className = "notice-detail";
@@ -146,4 +160,12 @@ document.addEventListener("DOMContentLoaded",()=>{
  $("keyword")?.addEventListener("keydown",e=>{if(e.key==="Enter")renderResults()});
  const year=$("year"); if(year) year.textContent=new Date().getFullYear();
  loadSupportData();
-});
+})    // 상세 공고를 문장과 항목별 문단으로 분리해 읽기 쉽게 표시합니다.
+    const detailText = item.detail || item.content || item.contents || item.description || item.body || "";
+    const detail = document.createElement("div"); detail.className = "notice-detail";
+    splitReadableParagraphs(detailText).forEach(text => {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = text;
+      detail.append(paragraph);
+    });
+;
