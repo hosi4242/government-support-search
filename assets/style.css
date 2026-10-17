@@ -5,3 +5,18 @@
 .skip-link{position:absolute;left:12px;top:-60px;background:var(--blue);color:#fff;padding:10px 16px;border-radius:8px;z-index:10;text-decoration:none;font-size:14px;font-weight:700}
 .skip-link:focus{top:12px}
 .notfound{text-align:center}
+
+
+/* 지원사업 공고 상세 내용의 가독성 */
+.notice-detail{margin:2px 0 8px;padding:14px 16px;background:#f8faff;border:1px solid #e4eaf5;border-radius:12px;color:#344054;font-size:13px;line-height:1.95;overflow-wrap:anywhere;}
+.notice-detail p{margin:0 0 1em;white-space:pre-wrap;}
+.notice-detail p:last-child{margin-bottom:0;}
+@media(max-width:700px){.notice-detail{padding:12px;font-size:13px;line-height:1.9;}}
+
+
+/* 공고 상세 원문: 문단 간격과 목록 가독성 강화 */
+.notice-detail{display:flex;flex-direction:column;gap:0;margin:4px 0 10px;padding:18px 20px;background:#f8faff;border:1px solid #dce6f7;border-left:4px solid #7398e8;border-radius:12px;color:#26364f;font-size:14px;line-height:2;overflow-wrap:anywhere;word-break:keep-all;}
+.notice-detail p{margin:0;padding:0 0 12px;white-space:pre-wrap;}
+.notice-detail p+p{border-top:1px solid #e8edf6;padding-top:12px;}
+.notice-detail p:last-child{padding-bottom:0;}
+@media(max-width:700px){.notice-detail{padding:14px 13px;font-size:14px;line-height:1.9;word-break:normal}.notice-detail p{padding-bottom:10px}.notice-detail p+p{padding-top:10px}}
