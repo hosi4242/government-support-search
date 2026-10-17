@@ -124,7 +124,7 @@ test("scheduled sync paginates, upserts rows, and never deletes existing data", 
     assert.equal(batches[2][0].values[0], "A101");
     assert.equal(cleanupRuns.length, 2);
     assert.match(cleanupRuns[0].sql, /CREATE TABLE IF NOT EXISTS support_announcements/);
-    assert.match(cleanupRuns[0].sql, /DELETE FROM support_announcements WHERE fetched_at < \?/);
+    assert.match(cleanupRuns[1].sql, /DELETE FROM support_announcements WHERE fetched_at < \?/);
   } finally {
     globalThis.fetch = originalFetch;
   }
