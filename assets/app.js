@@ -5,6 +5,24 @@ let apiSource = "";
 
 
 const $ = (id) => document.getElementById(id);
+function cleanApiText(value){
+ if (value == null) return "";
+ return String(value)
+   .replace(/&nbsp;|&#160;|&#xA0;/gi, " ")
+   .replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
+   .replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'")
+   .replace(/&amp;/gi, "&")
+   .replace(/<\s*\/p\s*>/gi, "\n")
+   .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+   .replace(/<\s*\/li\s*>/gi, "\n")
+   .replace(/<[^>]*>/g, "")
+   .replace(/&nbsp;|&#160;|&#xA0;/gi, " ")
+   .replace(/[ \t]+\n/g, "\n")
+   .replace(/\n[ \t]+/g, "\n")
+   .replace(/\n{3,}/g, "\n\n")
+   .replace(/[ \t]{2,}/g, " ")
+   .trim();
+}
 // 외부 API 데이터 연결 시 javascript: 등 위험한 URL 스킴 차단 (http/https만 허용)
 function safeUrl(u){
  if (!u) return "#";
@@ -19,7 +37,7 @@ function renderResults(){
  const region = $("region")?.value || "";
  const category = $("category")?.value || "";
  const filtered = SUPPORT_DATA.filter(item => {
-   const searchable = [item.title,item.category,item.region,item.agency,item.target,item.summary].join(" ").toLowerCase();
+   const searchable = [item.title,item.category,item.region,item.agency,item.target,item.summary,item.detail].join(" ").toLowerCase();
    return (!keyword || searchable.includes(keyword)) &&
      (scope === "all" || item.scope === scope) &&
      (!region || item.region === region || item.region === "전국") &&
@@ -33,7 +51,7 @@ function renderResults(){
    const deadline = document.createElement("span"); deadline.className = "deadline"; deadline.textContent = item.period && item.period !== "공고 원문 확인" ? item.period : "공고 정보";
    top.append(tag,deadline);
    const title = document.createElement("h3"); title.textContent = item.title;
-   const summary = document.createElement("p"); summary.className = "summary"; summary.textContent = item.summary;
+   const summary = document.createElement("p"); summary.className = "summary"; summary.textContent = cleanApiText(item.summary);
    // 상세 공고의 HTML 줄바꿈과 붙어 있는 문장을 읽기 좋은 문단으로 정리합니다.
    const detailText = item.detail || item.content || item.contents || item.description || item.body || "";
    const detail = document.createElement("div"); detail.className = "notice-detail";
