@@ -14,7 +14,7 @@
     {
       "binding": "SUPPORTS_DB",
       "database_name": "government-support-search-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "13937fd6-0de1-4f3d-bd79-6d65fe6068d5",
       "migrations_dir": "migrations"
     }
   ],
