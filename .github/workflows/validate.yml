@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feat/d1-daily-support-sync
+      - fix/integrated-d1-readable-notices
   pull_request:
     branches:
       - main
