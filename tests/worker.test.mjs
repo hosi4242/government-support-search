@@ -17,6 +17,7 @@ const apiRow = (id, title) => ({
   pblancId: id,
   pblancNm: title,
   bsnsSumryCn: title + " 요약",
+  pblancCn: "<p>상세 공고문 본문</p>",
   suptTrgt: "소상공인",
   suptInstNm: "테스트 기관",
   reqstBeginEndDe: "2026-10-01 ~ 2026-12-31",
@@ -28,6 +29,8 @@ test("worker, browser script, and Wrangler configuration parse", () => {
   const config = JSON.parse(configSource);
   assert.equal(config.name, "government-support-search");
   assert.equal(config.d1_databases[0].binding, "SUPPORTS_DB");
+  assert.equal(config.d1_databases[0].database_id, "13937fd6-0de1-4f3d-bd79-6d65fe6068d5");
+  assert.match(workerSource, /detail, target/);
   assert.deepEqual(config.triggers.crons, ["15 18 * * *"]);
   assert.match(workerSource, /async scheduled\(/);
 });
@@ -48,6 +51,7 @@ test("API route keeps a live API fallback and returns normalized items", async (
     assert.equal(body.count, 1);
     assert.equal(body.items[0].id, "A1");
     assert.equal(body.items[0].title, "테스트 지원사업");
+    assert.equal(body.items[0].detail, "<p>상세 공고문 본문</p>");
     assert.equal(body.items[0].scope, "small");
     assert.equal(body.items[0].url, "https://example.com/A1");
     assert.equal(body.dataMode, "live");
