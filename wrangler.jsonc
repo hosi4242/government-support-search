@@ -9,5 +9,18 @@
     "run_worker_first": [
       "/api/*"
     ]
+  },
+  "d1_databases": [
+    {
+      "binding": "SUPPORTS_DB",
+      "database_name": "government-support-search-db",
+      "database_id": "13937fd6-0de1-4f3d-bd79-6d65fe6068d5",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "15 18 * * *"
+    ]
   }
 }

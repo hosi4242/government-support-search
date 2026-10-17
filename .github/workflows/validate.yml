@@ -1,0 +1,25 @@
+name: Validate government support search
+
+on:
+  push:
+    branches:
+      - feat/d1-daily-support-sync
+      - fix/integrated-d1-readable-notices
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run regression tests
+        run: node --test tests/worker.test.mjs
+      - name: Validate Wrangler deployment bundle
+        run: npx wrangler@4 deploy --dry-run

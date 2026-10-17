@@ -5,7 +5,6 @@ let apiSource = "";
 
 
 const $ = (id) => document.getElementById(id);
-// 외부 API 데이터 연결 시 javascript: 등 위험한 URL 스킴 차단 (http/https만 허용)
 function cleanApiText(value){
  if (value == null) return "";
  return String(value)
@@ -24,6 +23,7 @@ function cleanApiText(value){
    .replace(/[ \t]{2,}/g, " ")
    .trim();
 }
+// 외부 API 데이터 연결 시 javascript: 등 위험한 URL 스킴 차단 (http/https만 허용)
 function safeUrl(u){
  if (!u) return "#";
  try{ const p = new URL(u, location.href); return (p.protocol === "https:" || p.protocol === "http:") ? p.href : "#"; }
@@ -37,7 +37,7 @@ function renderResults(){
  const region = $("region")?.value || "";
  const category = $("category")?.value || "";
  const filtered = SUPPORT_DATA.filter(item => {
-   const searchable = [item.title,item.category,item.region,item.agency,item.target,item.summary].join(" ").toLowerCase();
+   const searchable = [item.title,item.category,item.region,item.agency,item.target,item.summary,item.detail].join(" ").toLowerCase();
    return (!keyword || searchable.includes(keyword)) &&
      (scope === "all" || item.scope === scope) &&
      (!region || item.region === region || item.region === "전국") &&
@@ -52,6 +52,33 @@ function renderResults(){
    top.append(tag,deadline);
    const title = document.createElement("h3"); title.textContent = item.title;
    const summary = document.createElement("p"); summary.className = "summary"; summary.textContent = cleanApiText(item.summary);
+   // 상세 공고의 HTML 줄바꿈과 붙어 있는 문장을 읽기 좋은 문단으로 정리합니다.
+   const detailText = item.detail || item.content || item.contents || item.description || item.body || "";
+   const detail = document.createElement("div"); detail.className = "notice-detail";
+   if (typeof detailText === "string" && detailText.trim()) {
+     const normalized = detailText
+       .replace(/<\s*br\s*\/?>/gi, "\n")
+       .replace(/<\/(?:p|div|li|tr|h[1-6]|section|article)\s*>/gi, "\n")
+       .replace(/<li\b[^>]*>/gi, "\n• ")
+       .replace(/<[^>]*>/g, " ")
+       .replace(/&nbsp;|&#160;/gi, " ")
+       .replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
+       .replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'")
+       .replace(/\r\n?/g, "\n")
+       .replace(/[ \t\u00a0]+/g, " ")
+       .replace(/ *\n */g, "\n")
+       .replace(/\n{2,}/g, "\n")
+       .trim();
+     const chunks = normalized
+       .replace(/([.!?。])(?=[가-힣A-Z0-9“"‘'])/g, "$1\n")
+       .replace(/(■|●|○|◆|▶|※|[•▪‣]|\d+[.)、]|[가-힣][.)、]|\[[^\]]{1,24}\]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\s*[:：])/g, "\n$1")
+       .split(/\n+/).map(part => part.trim()).filter(Boolean);
+     chunks.forEach(part => {
+       const paragraph = document.createElement("p");
+       paragraph.textContent = part;
+       detail.append(paragraph);
+     });
+   }
    const meta = document.createElement("dl"); meta.className = "meta-list";
    [["주관 기관",item.agency],["지원 대상",item.target],["신청 기간",item.period]].forEach(([k,v])=>{
      const row = document.createElement("div"); row.className = "meta-row";
@@ -60,7 +87,9 @@ function renderResults(){
      row.append(dt,dd); meta.append(row);
    });
    const link = document.createElement("a"); link.className = "card-link"; link.href = safeUrl(item.url); link.target = "_blank"; link.rel = "noopener noreferrer"; link.textContent = "공식 공고문 열기 ↗";
-   card.append(top,title,summary,meta);
+   card.append(top,title,summary);
+   if (detail.childElementCount) card.append(detail);
+   card.append(meta);
    if (item.url) card.append(link);
    results.append(card);
  });
