@@ -87,6 +87,7 @@ function regionFor(text) {
 function mapRow(row, index, fetchedAt) {
   const title = firstValue(row, ["pblancNm","bizNm","title","announcementTitle","공고명","nttSj","bizTitle","사업명","사업공고명"]);
   const summary = firstValue(row, ["bsnsSumryCn","bizSumry","summary","사업개요내용","description","content","pblancCn","공고내용"], "상세 내용은 공식 공고문에서 확인해 주세요.");
+  const detail = firstValue(row, ["pblancCn","pblancContents","pblancDtlCn","bizDetail","detail","contents","content","description","body","dtlCn","bsnsDtlCn","공고내용","공고상세내용","사업내용","지원내용"], "");
   const target = firstValue(row, ["suptTrgt","suptTrgtNm","target","지원대상","지원 대상","trgt","trgetNm","지원대상내용"], "공고 원문 확인");
   const agency = firstValue(row, ["suptInstNm","excInstNm","agency","기관명","organNm","pblancInstNm","소관명","수행기관명","주관기관"], "공고 원문 확인");
   const period = firstValue(row, ["reqstBeginEndDe","reqstPeriod","applicationPeriod","신청기간","period","reqstDe","신청기간내용"]);
@@ -102,6 +103,7 @@ function mapRow(row, index, fetchedAt) {
     id,
     title,
     summary,
+    detail,
     target,
     agency,
     period: period || [begin, end].filter(Boolean).join(" ~ ") || "공고 원문 확인",
@@ -168,7 +170,7 @@ function apiErrorResponse(error) {
 async function readStoredSupports(env) {
   if (!env.SUPPORTS_DB) return null;
   const result = await env.SUPPORTS_DB.prepare(
-    "SELECT id, title, summary, target, agency, period, url, category, region, scope, updated_at AS updatedAt, fetched_at AS fetchedAt FROM support_announcements ORDER BY COALESCE(updated_at, fetched_at) DESC, title ASC"
+    "SELECT id, title, summary, detail, target, agency, period, url, category, region, scope, updated_at AS updatedAt, fetched_at AS fetchedAt FROM support_announcements ORDER BY COALESCE(updated_at, fetched_at) DESC, title ASC"
   ).all();
   const rows = result?.results;
   if (!Array.isArray(rows) || rows.length === 0) return null;
@@ -240,8 +242,8 @@ async function syncAllSupports(env) {
   for (const item of collected) unique.set(item.id, item);
   const items = [...unique.values()];
   const statements = items.map(item => env.SUPPORTS_DB.prepare(
-    "INSERT INTO support_announcements (id, title, summary, target, agency, period, url, category, region, scope, updated_at, fetched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET title=excluded.title, summary=excluded.summary, target=excluded.target, agency=excluded.agency, period=excluded.period, url=excluded.url, category=excluded.category, region=excluded.region, scope=excluded.scope, updated_at=excluded.updated_at, fetched_at=excluded.fetched_at"
-  ).bind(item.id, item.title, item.summary, item.target, item.agency, item.period, item.url, item.category, item.region, item.scope, item.updatedAt, item.fetchedAt));
+    "INSERT INTO support_announcements (id, title, summary, detail, target, agency, period, url, category, region, scope, updated_at, fetched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET title=excluded.title, summary=excluded.summary, detail=excluded.detail, target=excluded.target, agency=excluded.agency, period=excluded.period, url=excluded.url, category=excluded.category, region=excluded.region, scope=excluded.scope, updated_at=excluded.updated_at, fetched_at=excluded.fetched_at"
+  ).bind(item.id, item.title, item.summary, item.detail, item.target, item.agency, item.period, item.url, item.category, item.region, item.scope, item.updatedAt, item.fetchedAt));
 
   // Small batches avoid oversized D1 batch transactions for large result sets.
   for (let offset = 0; offset < statements.length; offset += 50) {
