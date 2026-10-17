@@ -22,19 +22,19 @@ function cleanApiText(value){
 }
 function splitReadableParagraphs(value) {
  const normalized = cleanApiText(value)
-   .replace(/\\r\\n?/g, "\\n")
-   .replace(/[ \\t\\u00a0]+/g, " ")
-   .replace(/ *\\n */g, "\\n")
+   .replace(/\r\n?/g, "\n")
+   .replace(/[ \t\u00a0]+/g, " ")
+   .replace(/ *\n */g, "\n")
    .trim();
  if (!normalized) return [];
- const parts = normalized.split("\\n");
+ const parts = normalized.split("\n");
  const output = [];
  for (const raw of parts) {
    const item = raw.trim();
    if (!item) continue;
    const sentences = item.split(/(?<=[.!?。]) +(?=[가-힣])/);
    for (const sentence of sentences) {
-     const headingParts = sentence.split(/(?=■|●|○|◆|▶|※|[•▪‣]|\\d+[.)、]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\\s*[:：])/);
+     const headingParts = sentence.split(/(?=■|●|○|◆|▶|※|[•▪‣]|\d+[.)、]|(?:지원|신청|접수|사업|대상|기간|내용|방법|문의|유의)\s*[:：])/);
      for (const heading of headingParts) {
        if (heading.trim()) output.push(heading.trim());
      }
