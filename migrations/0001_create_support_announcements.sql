@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS support_announcements (
   id TEXT PRIMARY KEY NOT NULL,
   title TEXT NOT NULL,
   summary TEXT NOT NULL DEFAULT '',
+  detail TEXT NOT NULL DEFAULT '',
   target TEXT NOT NULL DEFAULT '',
   agency TEXT NOT NULL DEFAULT '',
   period TEXT NOT NULL DEFAULT '',
